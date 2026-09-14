@@ -13,3 +13,10 @@ Thumbs.db
 # Local Flask state
 *.log
 .env
+
+# Report artifacts (kept local only, not deployed)
+*.docx
+generar_informe.py
+generar_informe_en.py
+ActividadIngles/generar_graficos.py
+ActividadIngles/graficos/

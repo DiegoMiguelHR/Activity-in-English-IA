@@ -1,5 +1,0 @@
-﻿Modelo,Mejor F1-Score,Mejores hiperparametros
-KNN,0.9923,"{'clf__metric': 'euclidean', 'clf__n_neighbors': 5, 'clf__weights': 'distance'}"
-SVC,0.99,"{'clf__C': 10, 'clf__gamma': 1, 'clf__kernel': 'rbf'}"
-GradientBoosting,0.9886,"{'clf__learning_rate': 0.1, 'clf__max_depth': 4, 'clf__n_estimators': 100}"
-GaussianNB,0.953,{'clf__var_smoothing': 1e-09}
