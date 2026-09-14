@@ -1,0 +1,164 @@
+{
+  "mode": "full",
+  "generated_at": "2026-09-14 04:26:39 UTC",
+  "dataset": {
+    "name": "Occupancy Detection Dataset",
+    "source": "UCI Machine Learning Repository (Paper: Accurate occupancy detection of an office room from light, temperature, humidity and CO2 measurements)",
+    "instances": 17895,
+    "features": 5,
+    "columns": [
+      "Temperature",
+      "Humidity",
+      "Light",
+      "CO2",
+      "HumidityRatio"
+    ],
+    "classes": {
+      "empty": 14117,
+      "occupied": 3778
+    },
+    "imbalance": 0.7889
+  },
+  "models": [
+    {
+      "name": "KNN",
+      "f1": 0.9923,
+      "accuracy": 0.9949,
+      "precision": 0.9912,
+      "recall": 0.9934,
+      "time_s": 0.5055,
+      "params": {
+        "metric": "euclidean",
+        "n_neighbors": 5,
+        "weights": "distance"
+      },
+      "confusion": [
+        [
+          14059,
+          58
+        ],
+        [
+          34,
+          3744
+        ]
+      ],
+      "total": 17895
+    },
+    {
+      "name": "SVC",
+      "f1": 0.99,
+      "accuracy": 0.9933,
+      "precision": 0.9869,
+      "recall": 0.9931,
+      "time_s": 44.2521,
+      "params": {
+        "C": 10,
+        "gamma": 1,
+        "kernel": "rbf"
+      },
+      "confusion": [
+        [
+          14024,
+          93
+        ],
+        [
+          27,
+          3751
+        ]
+      ],
+      "total": 17895
+    },
+    {
+      "name": "GradientBoosting",
+      "f1": 0.9886,
+      "accuracy": 0.9923,
+      "precision": 0.9866,
+      "recall": 0.9906,
+      "time_s": 11.7248,
+      "params": {
+        "learning_rate": 0.1,
+        "max_depth": 4,
+        "n_estimators": 100
+      },
+      "confusion": [
+        [
+          14027,
+          90
+        ],
+        [
+          47,
+          3731
+        ]
+      ],
+      "total": 17895
+    },
+    {
+      "name": "GaussianNB",
+      "f1": 0.953,
+      "accuracy": 0.967,
+      "precision": 0.9327,
+      "recall": 0.9784,
+      "time_s": 0.432,
+      "params": {
+        "var_smoothing": 1e-09
+      },
+      "confusion": [
+        [
+          13533,
+          584
+        ],
+        [
+          7,
+          3771
+        ]
+      ],
+      "total": 17895
+    }
+  ],
+  "kernels": [
+    {
+      "kernel": "rbf",
+      "f1": 0.99
+    },
+    {
+      "kernel": "linear",
+      "f1": 0.9858
+    },
+    {
+      "kernel": "poly",
+      "f1": 0.979
+    }
+  ],
+  "metricas": [
+    {
+      "metric": "euclidean",
+      "f1": 0.9923
+    },
+    {
+      "metric": "manhattan",
+      "f1": 0.9921
+    }
+  ],
+  "verdict": {
+    "winner": "KNN",
+    "winner_f1": 0.9923,
+    "q1": "After stratified 5-fold cross-validation, KNN achieved the best balance between accuracy and generalization, with a macro F1-Score of 0.9923 and an accuracy of 0.9949. It balanced false positives and false negatives almost perfectly (58 FP and 34 FN out of 17,895 instances), beating the lowest-performing model, GaussianNB, which reached 0.9530 (with 584 false positives). Using the macro F1 guarantees the result is not distorted by the class imbalance.",
+    "q2": "No. In this experiment the mathematically more complex models did NOT justify their high computational cost. While SVC (44.25 s) and GradientBoosting (11.72 s) reached F1-Scores of 0.9900 and 0.9886 respectively, KNN obtained the winning score (0.9923) in just 0.51 s, and the fastest model, GaussianNB, finished in 0.43 s. The extra cost of SVC and Boosting did not translate into better performance, so for this problem additional complexity is not profitable.",
+    "q3": "The dataset has five environmental variables. Two PCA components retain an important share of the variance, and the classes (empty vs. occupied) form dense, well-separated clusters. This explains KNN's triumph: its distance-based decision boundaries follow the natural separation of the clusters without rigid assumptions. SVC (RBF kernel) and Gradient Boosting achieved almost equivalent boundaries but at a much higher cost. On the opposite end, GaussianNB drew an overly rigid probabilistic boundary (assuming independence among correlated variables such as Light and CO2) and produced the highest number of false positives of the four models.",
+    "conclusion": "KNN (best params {'metric': 'euclidean', 'n_neighbors': 5, 'weights': 'distance'}) is the winning model: the best F1-Score with the lowest computational cost among the top three. Complex models (SVC and Gradient Boosting) did not justify their extra cost, and GaussianNB lagged behind because its independence assumptions were violated. For low-dimensional problems with well-separated classes, a simple geometric method such as KNN can be the most efficient and accurate option."
+  },
+  "figures": {
+    "f1_bars": "assets/resultados_f1.png",
+    "time_bars": "assets/resultados_tiempo.png",
+    "f1_time": "assets/resultados_f1_tiempo.png",
+    "kernels": "assets/comparacion_kernels.png",
+    "metrics": "assets/comparacion_metricas.png",
+    "boundaries": "assets/fronteras_decision_PCA.png",
+    "correlation": "assets/correlacion_features.png"
+  },
+  "runtime_seconds": 61.23,
+  "pca_variance": [
+    0.4639,
+    0.3579
+  ]
+}
