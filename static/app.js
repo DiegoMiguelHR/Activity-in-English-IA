@@ -10,7 +10,7 @@ const $ = (id) => document.getElementById(id);
 const PLOT_TEMPLATE = {
   paper_bgcolor: "rgba(0,0,0,0)",
   plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#c9d6ec", family: "Segoe UI, sans-serif" },
+  font: { color: "#1e293b", family: "Segoe UI, sans-serif" },
   margin: { t: 20, r: 16, b: 40, l: 44 },
 };
 
@@ -103,9 +103,9 @@ function renderModelCards() {
             <span>${m.name}</span>
             <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="${COLORES[m.name] || "#888"}" /></svg>
           </h5>
-          <p class="display-6 fw-bold mb-1" style="color:${COLORES[m.name] || "#fff"}">${m.f1.toFixed(4)}</p>
+          <p class="display-6 fw-bold mb-1" style="color:${COLORES[m.name] || "#1e293b"}">${m.f1.toFixed(4)}</p>
           <p class="text-muted small mb-2">macro F1-Score · 5-fold CV</p>
-          <table class="table table-sm table-dark mb-2 small">
+          <table class="table table-sm table-borderless mb-2 small">
             <tr><td>Accuracy</td><td class="text-end">${m.accuracy.toFixed(4)}</td></tr>
             <tr><td>Precision</td><td class="text-end">${m.precision.toFixed(4)}</td></tr>
             <tr><td>Recall</td><td class="text-end">${m.recall.toFixed(4)}</td></tr>
@@ -232,6 +232,11 @@ function renderConfusiones() {
 
 function renderImagenes() {
   const fig = DATA.figures || {};
+  $("img-f1bars").src = cacheBus(fig.f1_bars || "");
+  $("img-timebars").src = cacheBus(fig.time_bars || "");
+  $("img-f1time").src = cacheBus(fig.f1_time || "");
+  $("img-kernels").src = cacheBus(fig.kernels || "");
+  $("img-metrics").src = cacheBus(fig.metrics || "");
   $("img-boundaries").src = cacheBus(fig.boundaries || "");
   $("img-correlation").src = cacheBus(fig.correlation || "");
   const v = DATA.pca_variance || [];

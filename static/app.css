@@ -1,33 +1,34 @@
 :root {
-  --bg: #0b0f1a;
-  --card: #141a2a;
-  --card-2: #1a2236;
-  --border: #2a3550;
-  --accent: #38bdf8;
-  --text: #e6ecf5;
-  --muted: #93a1b8;
+  --bg: #f3f6fb;
+  --card: #ffffff;
+  --card-2: #f8fafc;
+  --border: #dbe3ee;
+  --accent: #2563eb;
+  --text: #1e293b;
+  --muted: #64748b;
 }
 
 body {
-  background: linear-gradient(180deg, #0b0f1a 0%, #0f1524 100%);
+  background: linear-gradient(180deg, #f6f9fd 0%, #eef2f8 100%);
   color: var(--text);
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   min-height: 100vh;
 }
 
 .navbar {
-  background: rgba(10, 14, 24, 0.92);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
 }
+.navbar .navbar-brand { color: var(--text); }
 
 .hero {
-  background: radial-gradient(1200px 400px at 20% -10%, #1d3a5f 0%, transparent 60%),
-    linear-gradient(135deg, #16233f 0%, #10182b 100%);
+  background: radial-gradient(1200px 400px at 20% -10%, #dbeafe 0%, transparent 60%),
+    linear-gradient(135deg, #eef4ff 0%, #f8fafc 100%);
   border: 1px solid var(--border);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
 }
-.hero .lead { color: #c6d3ea; }
+.hero .lead { color: #475569; }
 
 .section-title {
   color: var(--accent);
@@ -36,7 +37,7 @@ body {
   margin-bottom: 1rem;
 }
 
-.chart-title { color: #c9d6ec; margin-bottom: 0.6rem; }
+.chart-title { color: #334155; margin-bottom: 0.6rem; }
 
 .card, .phase-card {
   background: var(--card);
@@ -51,8 +52,8 @@ body {
 .plot-area { min-height: 320px; }
 
 .modal-card {
-  border: 2px solid var(--accent);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 12px 40px rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
   position: relative;
 }
 .winner-ribbon {
@@ -70,11 +71,6 @@ body {
 
 .card-text small { color: var(--muted); }
 
-.table-dark {
-  --bs-table-bg: var(--card-2);
-  --bs-table-border-color: var(--border);
-}
-
 .badge-outline {
   background: transparent;
   border: 1px solid var(--vertical-border, var(--accent));
@@ -86,7 +82,7 @@ footer { border-top: 1px solid var(--border); }
 #status-pill.training { background-color: #f59e0b; color: #0b0f1a; animation: pulse 1.4s infinite; }
 #status-pill.done { background-color: #22c55e; color: #0b0f1a; }
 #status-pill.error { background-color: #ef4444; color: #fff; }
-#status-pill.idle { background-color: #64748b; }
+#status-pill.idle { background-color: #64748b; color: #fff; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -94,4 +90,4 @@ footer { border-top: 1px solid var(--border); }
 }
 
 .verdict-answer h5 { color: var(--accent); }
-.verdict-answer p { color: #c6d3ea; text-align: justify; }
+.verdict-answer p { color: #334155; text-align: justify; }

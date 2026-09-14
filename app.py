@@ -89,7 +89,9 @@ def index():
 
 @app.route("/api/results")
 def api_results():
-    return jsonify(load_data())
+    resp = jsonify(load_data())
+    resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return resp
 
 
 @app.post("/api/train")
@@ -109,7 +111,9 @@ def api_status():
 
 @app.route("/assets/<path:filename>")
 def assets(filename):
-    return send_from_directory(ASSETS_DIR, filename)
+    resp = send_from_directory(ASSETS_DIR, filename)
+    resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return resp
 
 
 if __name__ == "__main__":
