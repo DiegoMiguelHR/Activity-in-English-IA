@@ -1,6 +1,6 @@
 {
   "mode": "full",
-  "generated_at": "2026-09-14 04:54:12 UTC",
+  "generated_at": "2026-09-14 06:28:54 UTC",
   "dataset": {
     "name": "Occupancy Detection Dataset",
     "source": "UCI Machine Learning Repository (Paper: Accurate occupancy detection of an office room from light, temperature, humidity and CO2 measurements)",
@@ -26,7 +26,7 @@
       "accuracy": 0.9949,
       "precision": 0.9912,
       "recall": 0.9934,
-      "time_s": 0.5044,
+      "time_s": 0.8666,
       "params": {
         "metric": "euclidean",
         "n_neighbors": 5,
@@ -50,7 +50,7 @@
       "accuracy": 0.9933,
       "precision": 0.9869,
       "recall": 0.9931,
-      "time_s": 36.5396,
+      "time_s": 55.486,
       "params": {
         "C": 10,
         "gamma": 1,
@@ -74,7 +74,7 @@
       "accuracy": 0.9923,
       "precision": 0.9866,
       "recall": 0.9906,
-      "time_s": 11.3105,
+      "time_s": 9.1979,
       "params": {
         "learning_rate": 0.1,
         "max_depth": 4,
@@ -98,7 +98,7 @@
       "accuracy": 0.967,
       "precision": 0.9327,
       "recall": 0.9784,
-      "time_s": 0.1948,
+      "time_s": 0.1381,
       "params": {
         "var_smoothing": 1e-09
       },
@@ -143,7 +143,7 @@
     "winner": "KNN",
     "winner_f1": 0.9923,
     "q1": "After stratified 5-fold cross-validation, KNN achieved the best balance between accuracy and generalization, with a macro F1-Score of 0.9923 and an accuracy of 0.9949. It balanced false positives and false negatives almost perfectly (58 FP and 34 FN out of 17,895 instances), beating the lowest-performing model, GaussianNB, which reached 0.9530 (with 584 false positives). Using the macro F1 guarantees the result is not distorted by the class imbalance.",
-    "q2": "No. In this experiment the mathematically more complex models did NOT justify their high computational cost. While SVC (36.54 s) and GradientBoosting (11.31 s) reached F1-Scores of 0.9900 and 0.9886 respectively, KNN obtained the winning score (0.9923) in just 0.50 s, and the fastest model, GaussianNB, finished in 0.19 s. The extra cost of SVC and Boosting did not translate into better performance, so for this problem additional complexity is not profitable.",
+    "q2": "No. In this experiment the mathematically more complex models did NOT justify their high computational cost. While SVC (55.49 s) and GradientBoosting (9.20 s) reached F1-Scores of 0.9900 and 0.9886 respectively, KNN obtained the winning score (0.9923) in just 0.87 s, and the fastest model, GaussianNB, finished in 0.14 s. The extra cost of SVC and Boosting did not translate into better performance, so for this problem additional complexity is not profitable.",
     "q3": "The dataset has five environmental variables. Two PCA components retain an important share of the variance, and the classes (empty vs. occupied) form dense, well-separated clusters. This explains KNN's triumph: its distance-based decision boundaries follow the natural separation of the clusters without rigid assumptions. SVC (RBF kernel) and Gradient Boosting achieved almost equivalent boundaries but at a much higher cost. On the opposite end, GaussianNB drew an overly rigid probabilistic boundary (assuming independence among correlated variables such as Light and CO2) and produced the highest number of false positives of the four models.",
     "conclusion": "KNN (best params {'metric': 'euclidean', 'n_neighbors': 5, 'weights': 'distance'}) is the winning model: the best F1-Score with the lowest computational cost among the top three. Complex models (SVC and Gradient Boosting) did not justify their extra cost, and GaussianNB lagged behind because its independence assumptions were violated. For low-dimensional problems with well-separated classes, a simple geometric method such as KNN can be the most efficient and accurate option."
   },
@@ -156,7 +156,7 @@
     "boundaries": "assets/fronteras_decision_PCA.png",
     "correlation": "assets/correlacion_features.png"
   },
-  "runtime_seconds": 53.03,
+  "runtime_seconds": 69.67,
   "pca_variance": [
     0.4639,
     0.3579

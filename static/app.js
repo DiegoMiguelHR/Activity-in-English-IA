@@ -23,6 +23,25 @@ const COLORES = {
 
 let DATA = null;
 
+/* ------------------- safe Plotly access ------------------- */
+
+function showPlotlyNote() {
+  const n = $("plotly-note");
+  if (n) n.classList.remove("d-none");
+}
+
+function sfPlot(target, data, layout, config) {
+  if (typeof window.Plotly === "undefined") {
+    showPlotlyNote();
+    return;
+  }
+  try {
+    window.Plotly.newPlot(target, data, layout, config);
+  } catch (e) {
+    console.warn("Plotly error on #" + target, e);
+  }
+}
+
 /* ----------------------------- load ----------------------------- */
 
 async function cargarDatos() {
@@ -68,7 +87,7 @@ function renderDataset() {
     d.columns.join(", ") + " · class imbalance ~" + (d.imbalance * 100).toFixed(0) +
     "% empty vs ~" + (100 - (d.imbalance * 100)).toFixed(0) + "% occupied.";
 
-  Plotly.newPlot("chart-dataset", [{
+  sfPlot("chart-dataset", [{
     x: ["Empty (0)", "Occupied (1)"],
     y: [clases.empty, clases.occupied],
     type: "bar",
@@ -153,7 +172,7 @@ function renderCharts() {
   const modelos = DATA.models;
   const g = graf(modelos);
 
-  Plotly.newPlot("chart-f1", [{
+  sfPlot("chart-f1", [{
     x: g.x, y: g.y, type: "bar", marker: { color: g.color },
     text: g.y.map(v => v.toFixed(4)), textposition: "auto",
   }], Object.assign({}, PLOT_TEMPLATE, {
@@ -164,14 +183,14 @@ function renderCharts() {
   const ordT = ["GaussianNB", "KNN", "GradientBoosting", "SVC"];
   const t = { x: ordT, y: ordT.map(n => (modelos.find(m => m.name === n) || { time_s: 0 }).time_s),
               color: ordT.map(n => COLORES[n] || "#888") };
-  Plotly.newPlot("chart-time", [{
+  sfPlot("chart-time", [{
     x: t.x, y: t.y, type: "bar", marker: { color: t.color },
     text: t.y.map(v => v.toFixed(2) + " s"), textposition: "auto",
   }], Object.assign({}, PLOT_TEMPLATE, {
     yaxis: { title: "Time (s)" }, showlegend: false,
   }), { responsive: true, displayModeBar: false });
 
-  Plotly.newPlot("chart-f1time", [{
+  sfPlot("chart-f1time", [{
     x: modelos.map(m => m.time_s), y: modelos.map(m => m.f1), mode: "markers+text",
     type: "scatter", text: modelos.map(m => m.name), textposition: "top right",
     marker: { size: 18, color: modelos.map(m => COLORES[m.name] || "#888") },
@@ -180,7 +199,7 @@ function renderCharts() {
     showlegend: false,
   }), { responsive: true, displayModeBar: false });
 
-  Plotly.newPlot("chart-kernels", [{
+  sfPlot("chart-kernels", [{
     x: DATA.kernels.map(k => k.kernel), y: DATA.kernels.map(k => k.f1), type: "bar",
     marker: { color: ["#ff7f0e", "#2ca02c", "#d62728"] },
     text: DATA.kernels.map(k => k.f1.toFixed(4)), textposition: "auto",
@@ -188,7 +207,7 @@ function renderCharts() {
     yaxis: { title: "Best macro F1", range: [0.85, 1.005] }, showlegend: false,
   }), { responsive: true, displayModeBar: false });
 
-  Plotly.newPlot("chart-metrics", [{
+  sfPlot("chart-metrics", [{
     x: DATA.metricas.map(m => m.metric), y: DATA.metricas.map(m => m.f1), type: "bar",
     marker: { color: ["#17becf", "#9467bd"] },
     text: DATA.metricas.map(m => m.f1.toFixed(4)), textposition: "auto",
@@ -214,7 +233,7 @@ function renderConfusiones() {
         <p class="text-muted small mb-0 mt-2 text-center">FP = ${cm[0][1]} · FN = ${cm[1][0]}</p>
       </div></div>`;
     grid.appendChild(col);
-    Plotly.newPlot(col.querySelector(".cm-" + m.name.replace(/[^a-zA-Z]/g, "")), [{
+    sfPlot(col.querySelector(".cm-" + m.name.replace(/[^a-zA-Z]/g, "")), [{
       z: cm, x: etiq, y: etiq, type: "heatmap",
       colorscale: "Blues", showscale: false, zmin: 0, zmax: Math.max(...cm.flat(), 1),
       text: cm, texttemplate: "%{text}", textfont: { color: "white" },
@@ -271,6 +290,7 @@ async function reentrenar() {
   const btn = $("btn-train");
   if (btn.disabled) return;
   btn.disabled = true;
+  mostrarProgreso(true, "Starting…", 0);
   setStatus("training", "⏳ Training in background…");
 
   const res = await fetch("/api/train", { method: "POST" });
@@ -284,7 +304,19 @@ async function reentrenar() {
     } else {
       setStatus("error", "⚠️ Could not start training");
       btn.disabled = false;
+      mostrarProgreso(false);
     }
+  }
+}
+
+function mostrarProgreso(visible, mensaje, pct) {
+  const wrap = $("train-progress-wrap");
+  if (!wrap) return;
+  wrap.classList.toggle("d-none", !visible);
+  if (visible) {
+    $("train-message").textContent = mensaje || "";
+    $("train-percent").textContent = Math.round((pct || 0) * 100) + "%";
+    $("train-bar").style.width = Math.round((pct || 0) * 100) + "%";
   }
 }
 
@@ -296,18 +328,24 @@ async function pollEstado() {
   if (j.status === "training") {
     setStatus("training", "⏳ Training in background… (" +
       ((j.started || "").split(" ")[1] || "running") + ")");
-    setTimeout(pollEstado, 2500);
+    mostrarProgreso(true, j.message || "Working…", j.percent || 0);
+    setTimeout(pollEstado, 1500);
     return;
   }
 
   if (j.status === "done") {
     setStatus("done", "✅ Training finished · updating dashboard…");
+    mostrarProgreso(true, "Training finished — updating the dashboard…", 1);
     await cargarDatos();
     setStatus("done", "✅ Training finished " + (j.finished || ""));
+    mostrarProgreso(true, "Training finished — dashboard updated ✓", 1);
+    setTimeout(() => mostrarProgreso(false), 4000);
   } else if (j.status === "error") {
     setStatus("error", "⚠️ Error: " + (j.error || "unknown"));
+    mostrarProgreso(false);
   } else {
     setStatus("idle", "Ready");
+    mostrarProgreso(false);
   }
   btn.disabled = false;
 }

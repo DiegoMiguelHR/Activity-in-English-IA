@@ -57,16 +57,15 @@ def grid_full():
 
 
 def grid_quick():
-    """Reduced grids for fast web re-training (tips on Render free tier).
-    Keeps the three SVM kernels, both KNN distance metrics and the model families,
-    but shrinks n_estimators and the C/gamma ranges."""
+    """Reduced grids for fast web re-training (~3-6 min on Render free tier).
+    Drops poly kernel (kept in full mode) and shrinks combinations."""
     return {
         "SVC": (
             SVC(random_state=42),
             {
-                "clf__C": [1, 10],
+                "clf__C": [0.1, 1],
                 "clf__gamma": [0.1, 1],
-                "clf__kernel": ["rbf", "linear", "poly"],
+                "clf__kernel": ["rbf", "linear"],
             },
         ),
         "GaussianNB": (
@@ -84,7 +83,7 @@ def grid_quick():
         "KNN": (
             KNeighborsClassifier(),
             {
-                "clf__n_neighbors": [3, 5, 7],
+                "clf__n_neighbors": [3, 5],
                 "clf__weights": ["uniform", "distance"],
                 "clf__metric": ["euclidean", "manhattan"],
             },
@@ -325,13 +324,23 @@ def generar_correlacion(data, X, assets_dir):
 # ---------------------------------------------------------------------------
 # Experimento principal
 # ---------------------------------------------------------------------------
-def run_experiment(json_path=None, assets_dir=None, n_jobs=1, mode="full"):
+def run_experiment(json_path=None, assets_dir=None, n_jobs=1, mode="full", progress=None):
     """Runs the experiment, writes resultados.json and regenerates figures.
 
     mode: "full" (official grids from the report) or "quick" (reduced grids
     for fast web re-training). Returns the data dict (also persisted to
     json_path when provided).
+    progress: optional callback(stage_text, percent_float) for live UI updates.
     """
+    def _emit(stage, pct):
+        if progress:
+            try:
+                progress(stage, min(max(float(pct), 0.0), 1.0))
+            except Exception:
+                pass
+
+    _emit("Loading dataset…", 0.02)
+
     t_total_inicio = datetime.now(timezone.utc)
 
     df = oc.cargar_datos()
@@ -351,7 +360,13 @@ def run_experiment(json_path=None, assets_dir=None, n_jobs=1, mode="full"):
     resultados = []
     gs_objects = {}
 
-    for nombre, (clf, grid) in modelos_def.items():
+    _emit("Optimizing models with GridSearchCV (5-fold)…", 0.05)
+
+    nombres = list(modelos_def.keys())
+    for i, (nombre, (clf, grid)) in enumerate(modelos_def.items()):
+        pct_inicio = 0.05 + (i / len(nombres)) * 0.65
+        pct_fin = 0.05 + ((i + 1) / len(nombres)) * 0.65
+        _emit(f"Training {nombre} (GridSearch)…", pct_inicio)
         t0 = datetime.now(timezone.utc)
         gs = GridSearchCV(oc.construir_pipeline(clf), grid,
                           scoring=scorer, cv=cv, n_jobs=n_jobs, verbose=0)
@@ -376,17 +391,18 @@ def run_experiment(json_path=None, assets_dir=None, n_jobs=1, mode="full"):
             "confusion": cm.tolist(),
             "total": total,
         })
+        _emit(f"{nombre} ✓ (F1={gs.best_score_:.4f}, {tiempo_s:.1f}s)", pct_fin)
 
     resultados.sort(key=lambda m: -m["f1"])
 
-    # Analisis de kernels (SVC): reutiliza la cuadricula ya ajustada
+    _emit("Analyzing SVM kernels…", 0.73)
     cvr = pd.DataFrame(gs_objects["SVC"].cv_results_)
     cvr["kernel"] = cvr["param_clf__kernel"].astype(str)
     gs_svc = cvr.groupby("kernel")["mean_test_score"].max()
     kernels = [{"kernel": k, "f1": round(float(v), 4)}
                for k, v in gs_svc.sort_values(ascending=False).items()]
 
-    # Analisis de metricas (KNN): reutiliza la cuadricula ya ajustada
+    _emit("Analyzing KNN distance metrics…", 0.78)
     cvr = pd.DataFrame(gs_objects["KNN"].cv_results_)
     cvr["metric"] = cvr["param_clf__metric"].astype(str)
     gs_knn = cvr.groupby("metric")["mean_test_score"].max()
@@ -423,18 +439,25 @@ def run_experiment(json_path=None, assets_dir=None, n_jobs=1, mode="full"):
 
     # ---- figuras ----
     if assets_dir:
+        _emit("Generating PCA decision boundaries…", 0.82)
         os.makedirs(assets_dir, exist_ok=True)
         var_pca = generar_fronteras(data, X, y, best_estimators, assets_dir)
         data["pca_variance"] = var_pca
+
+        _emit("Generating correlation heatmap…", 0.90)
         generar_correlacion(data, X, assets_dir)
+
+        _emit("Generating bar / scatter figures…", 0.95)
         generar_figuras(data, assets_dir)
 
     # ---- persistencia ----
     if json_path:
+        _emit("Saving resultados.json…", 0.98)
         os.makedirs(os.path.dirname(json_path), exist_ok=True)
         with open(json_path, "w", encoding="utf-8") as fh:
             json.dump(data, fh, ensure_ascii=False, indent=2)
 
+    _emit("Done ✓", 1.0)
     return data
 
 

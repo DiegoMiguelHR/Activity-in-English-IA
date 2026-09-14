@@ -37,6 +37,8 @@ _training = {
     "started": None,
     "finished": None,
     "error": None,
+    "message": None,
+    "percent": 0.0,
 }
 
 
@@ -56,21 +58,26 @@ def run_training():
     """Background task: re-runs the full 4-model experiment and updates assets."""
     import precompute  # heavy imports (sklearn/matplotlib) only when needed
 
+    def _set_progress(stage, pct):
+        with _lock:
+            _training["message"] = stage
+            _training["percent"] = pct
+
     with _lock:
         _training["status"] = "training"
         _training["started"] = _now()
         _training["finished"] = None
         _training["error"] = None
+        _training["message"] = "Preparing…"
+        _training["percent"] = 0.0
 
     try:
-        # "quick" mode: reduced but representative grids (the official full
-        # experiment is committed in app_data via precompute.py). Tips on
-        # Render free tier: a full SVC GridSearch can take tens of minutes.
         precompute.run_experiment(
             json_path=DATA_JSON,
             assets_dir=ASSETS_DIR,
             n_jobs=1,          # keep memory/CPU low on Render free tier
             mode=os.environ.get("RETRAIN_MODE", "quick"),
+            progress=_set_progress,
         )
         with _lock:
             _training["status"] = "done"
